@@ -38,6 +38,8 @@ dependencies:
   turn_page_transition: ^0.3.0
   firebase_core: ^2.15.1
   firebase_auth: ^4.7.3
+  firebase_storage: ^11.2.6
+  syncfusion_flutter_signaturepad: ^22.2.9
 
 dev_dependencies:
   flutter_test:

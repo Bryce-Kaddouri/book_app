@@ -224,13 +224,13 @@ class _SignupScreenState extends State<SignupScreen> {
                       _firstNameController.text,
                       _lastNameController.text,
                     );
+                    Navigator.pushNamed(context, '/check-email');
 
                     // do something
                   }
                   setState(() {
                     isLoading = false;
                   });
-                  Navigator.pushNamed(context, '/check-email');
                 },
                 child: isLoading
                     ? SizedBox(

@@ -4,7 +4,6 @@ import 'package:book_app/screens/auth/signup.dart';
 import 'package:book_app/screens/home/homeScreen.dart';
 import 'package:book_app/services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:turn_page_transition/turn_page_transition.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -107,7 +106,7 @@ class MyApp extends StatelessWidget {
                             ),
                           );
                         } else if (snapshot1.data == true) {
-                          return PageViewPage();
+                          return HomeScreen();
                         } else {
                           String email = snapshot.data!.email!;
                           return CheckEmailScreen();
@@ -120,51 +119,6 @@ class MyApp extends StatelessWidget {
               }
           }
         },
-      ),
-    );
-  }
-}
-
-class PageViewPage extends StatelessWidget {
-  PageViewPage({super.key});
-  List _page = [
-    Container(
-      color: Colors.red,
-    ),
-    Container(
-      color: Colors.green,
-    ),
-    Container(
-      color: Colors.blue,
-    ),
-    Container(
-      color: Colors.yellow,
-    ),
-    Container(
-      color: Colors.orange,
-    ),
-  ];
-
-  List<Color> colors = [
-    Colors.red,
-    Colors.green,
-    Colors.blue,
-    Colors.yellow,
-    Colors.orange,
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = TurnPageController();
-    return Scaffold(
-      body: TurnPageView.builder(
-        controller: controller,
-        itemCount: 5,
-        itemBuilder: (context, index) => _page[index],
-        overleafColorBuilder: (index) => colors[index],
-        animationTransitionPoint: 0.5,
-        useOnTap: false,
-        useOnSwipe: true,
       ),
     );
   }

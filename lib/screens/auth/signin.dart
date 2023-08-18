@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/auth_service.dart';
+import 'dart:async';
 
 class SigninScreen extends StatefulWidget {
   const SigninScreen({super.key});
@@ -18,6 +21,8 @@ class _SigninScreenState extends State<SigninScreen> {
   // controller for password field
   final TextEditingController _passwordController = TextEditingController();
   bool hidePassword = true;
+  bool isLoading = false;
+  bool isEmailError = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +50,33 @@ class _SigninScreenState extends State<SigninScreen> {
               TextFormField(
                 controller: _emailController, // assign controller
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.email),
+                  prefixIcon: Icon(
+                    Icons.email,
+                    color: isEmailError ? Colors.red : null,
+                  ),
                   labelText: 'Email',
                   hintText: 'Enter your email',
+                  suffixIcon: isEmailError
+                      ? Icon(
+                          Icons.error,
+                          color: Colors.red,
+                        )
+                      : null,
                 ),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    setState(() {
+                      isEmailError = true;
+                    });
+                    return 'Please enter your email';
+                  } else if (!value.contains('@')) {
+                    setState(() {
+                      isEmailError = true;
+                    });
+                    return 'Please enter a valid email';
+                  }
+                  return null;
+                },
               ),
               SizedBox(
                 height: 20,
@@ -76,13 +104,48 @@ class _SigninScreenState extends State<SigninScreen> {
                 height: 20,
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  setState(() {
+                    isLoading = true;
+                  });
                   if (_formKey.currentState!.validate()) {
                     // do something
                     print('Sign In');
+                    UserCredential? user =
+                        await AuthService().signInWithEmailAndPassword(
+                      _emailController.text.trim(),
+                      _passwordController.text.trim(),
+                    );
+                    if (user != null) {
+                      Navigator.pushReplacementNamed(context, '/home');
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Email or password is incorrect'),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          closeIconColor: Colors.white,
+                          backgroundColor: Colors.red,
+                          showCloseIcon: true,
+                          duration: Duration(seconds: 3),
+                        ),
+                      );
+                    }
                   }
+                  setState(() {
+                    isLoading = false;
+                  });
                 },
-                child: Text('Sign In'),
+                child: isLoading
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text('Sign In'),
               ),
               SizedBox(
                 height: 20,
