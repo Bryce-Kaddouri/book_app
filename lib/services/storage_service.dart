@@ -1,8 +1,10 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+// import XFile
+import 'package:image_picker/image_picker.dart';
+import 'dart:async';
+import 'dart:io';
 
 class StorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -28,47 +30,35 @@ class StorageService {
     }
   }
 
-  // method to upload file with a progress indicator in a dialog
-  Future<String?> uploadFileWithProgressIndicator(
-      File file, Function(double) onProgress) async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      return null;
+  Future<UploadTask> uploadFile(XFile? file) async {
+    if (file == null) {
+      /* ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No file was selected'),
+        ),
+      );*/
+      throw Exception('No file was selected');
     }
-    String folderName = 'users/${user.uid}/pages';
 
-    // get the number of files in the folder
-    ListResult? result = await listAll();
-    int fileCount = result!.items.length;
+    UploadTask uploadTask;
 
-    String fileName = 'page${fileCount + 1}.jpg';
+    // Create a Reference to the file
+    Reference ref = FirebaseStorage.instance
+        .ref()
+        .child('flutter-tests')
+        .child('/some-image.jpg');
 
-    try {
-      // upload file
-      UploadTask uploadTask = _storage
-          .ref('$folderName/$fileName')
-          .putFile(file, SettableMetadata(contentType: 'image/jpeg'));
+    final metadata = SettableMetadata(
+      contentType: 'image/jpeg',
+      customMetadata: {'picked-file-path': file.path},
+    );
 
-      // listen to the progress
-      uploadTask.snapshotEvents.listen((event) {
-        // get the progress
-        double progress = event.bytesTransferred / event.totalBytes;
-        // call the onProgress function
-        onProgress(progress);
-      });
-
-      // wait for the upload to complete
-      await uploadTask;
-      // get the download url
-      String downloadURL =
-          await _storage.ref('$folderName/$fileName').getDownloadURL();
-      // return download url
-      return downloadURL;
-    } catch (e) {
-      // print error
-      print(e);
-      // return null
-      return null;
+    if (kIsWeb) {
+      uploadTask = ref.putData(await file.readAsBytes(), metadata);
+    } else {
+      uploadTask = ref.putFile(File(file.path), metadata);
     }
+
+    return Future.value(uploadTask);
   }
 }

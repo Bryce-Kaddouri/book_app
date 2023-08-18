@@ -1,9 +1,18 @@
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../services/auth_service.dart';
 import 'package:turn_page_transition/turn_page_transition.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
+import 'dart:ui' as ui;
+import 'dart:async';
+
+import '../../services/storage_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -59,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen>
     );
 
     _page.insert(
-      _page.length,
+      0,
       Container(
         height: double.infinity,
         width: double.infinity,
@@ -108,7 +117,46 @@ class _HomeScreenState extends State<HomeScreen>
         body: Column(
           children: [
             Expanded(
-              child: TurnPageView.builder(
+                child: FutureBuilder(
+              future: StorageService().listAll(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    ListResult? result = snapshot.data as ListResult?;
+                    List<Reference> allFiles = result!.items;
+                    print(allFiles);
+                    return ListView.builder(
+                      itemCount: allFiles.length,
+                      itemBuilder: (context, index) {
+                        return FutureBuilder(
+                          future: allFiles[index].getDownloadURL(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              if (snapshot.hasData) {
+                                String? url = snapshot.data as String?;
+                                return Image.network(url!);
+                              } else {
+                                return Text('No data',
+                                    style: TextStyle(color: Colors.black));
+                              }
+                            } else {
+                              return CircularProgressIndicator();
+                            }
+                          },
+                        );
+                      },
+                    );
+                  } else {
+                    return Text('No data');
+                  }
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
+            )
+                /*
+              TurnPageView.builder(
                 controller: controller,
                 itemCount: 5,
                 itemBuilder: (context, index) => _page[index],
@@ -117,7 +165,8 @@ class _HomeScreenState extends State<HomeScreen>
                 useOnTap: false,
                 useOnSwipe: false,
               ),
-            ),
+              */
+                ),
             Container(
               height: 50,
               color: Colors.grey,
@@ -293,10 +342,33 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                   IconButton(
                     onPressed: () {
-                      // clear signature
-                      signaturePadKey.currentState!.clear();
+                      // show dialog to confirm adding page and user cannot edit the page after adding
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Add page'),
+                          content: Text('Are you sure you want to add page?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                // get the image
+                              },
+                              child: Text('Add'),
+                            ),
+                          ],
+                        ),
+                      );
                     },
-                    icon: Icon(Icons.clear),
+                    icon: Icon(
+                      Icons.add_circle_outline,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
