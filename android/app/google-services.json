@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "991837907165",
+    "project_id": "my-digital-writting-book",
+    "storage_bucket": "my-digital-writting-book.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:991837907165:android:43b2550bbd5d385a699334",
+        "android_client_info": {
+          "package_name": "com.brycekaddouri.mydigitalwrittingbook"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "991837907165-18lkgpiclj6efer812d860utg9iek11l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.brycekaddouri.mydigitalwrittingbook",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "991837907165-siklhukl6ebtpimna4emgcseh6trv38g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWHtdChdCgRgqcjtUfnT2ZwrxgPCw2f9k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "991837907165-j415mobs9ec3id44cjksu9262u15d1u7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "991837907165-ci36it1gk2s7j3tsav5osjts173nh7e7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.brycekaddouri.mydigitalwrittingbook"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:991837907165:android:ec493c9a5fde1b1a699334",
+        "android_client_info": {
+          "package_name": "com.example.book_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "991837907165-siklhukl6ebtpimna4emgcseh6trv38g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWHtdChdCgRgqcjtUfnT2ZwrxgPCw2f9k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "991837907165-j415mobs9ec3id44cjksu9262u15d1u7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "991837907165-ci36it1gk2s7j3tsav5osjts173nh7e7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.brycekaddouri.mydigitalwrittingbook"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
