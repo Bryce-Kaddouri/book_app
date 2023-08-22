@@ -23,6 +23,20 @@ class _SigninScreenState extends State<SigninScreen> {
   bool hidePassword = true;
   bool isLoading = false;
   bool isEmailError = false;
+  bool isRequesting = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // dispose controllers
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,12 +117,28 @@ class _SigninScreenState extends State<SigninScreen> {
               SizedBox(
                 height: 20,
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Don\'t remember your password?'),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/forgot-password');
+                    },
+                    child: Text('Reset Password'),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
               ElevatedButton(
                 onPressed: () async {
                   setState(() {
                     isLoading = true;
+                    isRequesting = true;
                   });
-                  if (_formKey.currentState!.validate()) {
+                  if (_formKey.currentState!.validate() && isRequesting) {
                     // do something
                     print('Sign In');
                     UserCredential? user =
@@ -135,6 +165,7 @@ class _SigninScreenState extends State<SigninScreen> {
                   }
                   setState(() {
                     isLoading = false;
+                    isRequesting = false;
                   });
                 },
                 child: isLoading

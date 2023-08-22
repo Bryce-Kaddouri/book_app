@@ -1,27 +1,44 @@
+import 'dart:html';
+import 'dart:ui' as ui;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 // import XFile
+import 'dart:async';
 import 'package:image_picker/image_picker.dart';
+
 import 'dart:async';
 import 'dart:io';
+
+import 'package:image_picker/image_picker.dart';
 
 class StorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // method to list all files in a folder
-  Future<ListResult?> listAll() async {
+  Future<List<String>?> listAll() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return null;
     }
+    List<String> files = [];
     String folderName = 'users/${user.uid}/pages';
     try {
       // list all files in a folder
       ListResult result = await _storage.ref(folderName).listAll();
       print(result);
       // return result
-      return result;
+      result.items.forEach((Reference ref) {
+        /*files.add(ref.fullPath);*/
+        // get download url
+        ref.getDownloadURL().then((value) {
+          files.add(value);
+          print(value);
+        });
+      });
+      print(files);
+      return files;
     } catch (e) {
       // print error
       print(e);
@@ -30,35 +47,35 @@ class StorageService {
     }
   }
 
-  Future<UploadTask> uploadFile(XFile? file) async {
-    if (file == null) {
-      /* ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No file was selected'),
-        ),
-      );*/
-      throw Exception('No file was selected');
+  // put blob
+  Future<void> uploadBlob(String path, Blob blob) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return;
     }
+    print('uploading blob');
+    String folderName = 'users/${user.uid}/pages';
+    // get the number of files in the folder
+    List? lst = await listAll();
+    int number = lst?.length ?? 0;
 
-    UploadTask uploadTask;
+    try {
+      // upload image
 
-    // Create a Reference to the file
-    Reference ref = FirebaseStorage.instance
-        .ref()
-        .child('flutter-tests')
-        .child('/some-image.jpg');
+      // convert image to bytes
+      UploadTask uploadTask;
+      Reference ref =
+          FirebaseStorage.instance.ref().child('$folderName/${number}.png');
+      final metadata = SettableMetadata(
+        contentType: 'image/png',
+      );
 
-    final metadata = SettableMetadata(
-      contentType: 'image/jpeg',
-      customMetadata: {'picked-file-path': file.path},
-    );
+      uploadTask = ref.putBlob(blob, metadata);
 
-    if (kIsWeb) {
-      uploadTask = ref.putData(await file.readAsBytes(), metadata);
-    } else {
-      uploadTask = ref.putFile(File(file.path), metadata);
+      return Future.value(uploadTask);
+    } catch (e) {
+      // print error
+      print(e);
     }
-
-    return Future.value(uploadTask);
   }
 }

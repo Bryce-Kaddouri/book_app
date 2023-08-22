@@ -1,10 +1,12 @@
 import 'package:book_app/screens/auth/checkEmail.dart';
+import 'package:book_app/screens/auth/forgotPassword.dart';
 import 'package:book_app/screens/auth/signin.dart';
 import 'package:book_app/screens/auth/signup.dart';
-import 'package:book_app/screens/home/homeScreen.dart';
+import 'package:book_app/screens/home/home_screen.dart';
 import 'package:book_app/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:turn_page_transition/turn_page_transition.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -69,6 +71,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => SignupScreen(),
         '/check-email': (context) => CheckEmailScreen(),
         '/home': (context) => HomeScreen(),
+        '/forgot-password': (context) => ForgotPasswordScreen(),
       },
       home: StreamBuilder(
         stream: AuthService().userChanges,
