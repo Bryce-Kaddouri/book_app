@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:book_app/services/storage_service.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 import '../../services/auth_service.dart';
@@ -30,36 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     print('initState');
     super.initState();
-    StorageService().listAll().then((value) {
-      for (int i = 0; i < value!.length; i++) {
-        pages.add(
-          Container(
-            child: Image.network(
-              'https://firebasestorage.googleapis.com/v0/b/my-digital-writting-book.appspot.com/users/jOLOb5O665OyWfu1WElIJvhFm1F3/pages/0.png?alt=media&token=https://firebasestorage.googleapis.com/v0/b/my-digital-writting-book.appspot.com/o/users%2FjOLOb5O665OyWfu1WElIJvhFm1F3%2Fpages%2F0.png?alt=media&token=19d6cb3e-be0b-4660-9915-d5d1ee27edd0',
-              fit: BoxFit.cover,
-            ),
-            height: double.infinity,
-            width: double.infinity,
-          ),
-        );
-      }
-    });
-    for (int i = 0; i < 10; i++) {
-      pages.add(
-        Container(
-          color: Colors.blue,
-          child: Center(
-            child: Text(
-              'Page ${i + 1}',
-              style: TextStyle(
-                fontSize: 30,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
     pages.add(
       SizedBox(
@@ -103,16 +74,66 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        body: PageView(
+        body: StreamBuilder(
+            stream: StorageService().listAll().asStream(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                ListResult? lst = snapshot.data as ListResult?;
+                print(lst!.items.length);
+
+                return PageView(
+                  physics: NeverScrollableScrollPhysics(),
+                  controller: controller,
+                  children: [
+                    ...lst.items.map((e) {
+                      return FutureBuilder(
+                        future: e.getDownloadURL(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Image.network(snapshot.data as String);
+                          } else {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                        },
+                      );
+                    }).toList(),
+                    ...pages,
+                    SizedBox(
+                      height: double.infinity,
+                      width: double.infinity,
+                      child: SfSignaturePad(
+                        key: _signaturePadKey,
+                        backgroundColor: Colors.grey[200],
+                      ),
+                    ),
+                  ],
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPage = index + 1;
+                    });
+                  },
+                );
+              } else {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            }),
+        /* PageView(
           physics: NeverScrollableScrollPhysics(),
           controller: controller,
-          children: pages,
+          children: [
+            ...pages,
+
+          ],
           onPageChanged: (index) {
             setState(() {
               _currentPage = index + 1;
             });
           },
-        ),
+        ),*/
 
         persistentFooterAlignment: AlignmentDirectional.center,
         persistentFooterButtons: [

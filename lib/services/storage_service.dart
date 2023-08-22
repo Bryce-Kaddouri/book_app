@@ -17,34 +17,28 @@ class StorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // method to list all files in a folder
-  Future<List<String>?> listAll() async {
+  Future<ListResult?> listAll() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return null;
     }
-    List<String> files = [];
     String folderName = 'users/${user.uid}/pages';
     try {
-      // list all files in a folder
+      // list all get download urls
       ListResult result = await _storage.ref(folderName).listAll();
-      print(result);
-      // return result
-      result.items.forEach((Reference ref) {
-        /*files.add(ref.fullPath);*/
-        // get download url
-        ref.getDownloadURL().then((value) {
-          files.add(value);
-          print(value);
-        });
-      });
-      print(files);
-      return files;
+      // loop through result
+      return Future.value(result);
     } catch (e) {
       // print error
       print(e);
       // return null
       return null;
     }
+  }
+
+  Future<int> getNbFiles() async {
+    ListResult? lst = await listAll();
+    return lst?.items.length ?? 0;
   }
 
   // put blob
@@ -56,8 +50,8 @@ class StorageService {
     print('uploading blob');
     String folderName = 'users/${user.uid}/pages';
     // get the number of files in the folder
-    List? lst = await listAll();
-    int number = lst?.length ?? 0;
+    int number = await getNbFiles();
+    print('number of files: $number');
 
     try {
       // upload image
