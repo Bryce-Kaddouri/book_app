@@ -37,8 +37,13 @@ class StorageService {
   }
 
   Future<int> getNbFiles() async {
-    ListResult? lst = await listAll();
-    return lst?.items.length ?? 0;
+    ListResult? result = await listAll();
+    int number = 0;
+    if (result != null) {
+      number = result.items.length;
+    }
+    print('number of files: $number');
+    return number;
   }
 
   // put blob
@@ -49,9 +54,8 @@ class StorageService {
     }
     print('uploading blob');
     String folderName = 'users/${user.uid}/pages';
+    int number = await getNbFiles(); // get the number of files in the folder
     // get the number of files in the folder
-    int number = await getNbFiles();
-    print('number of files: $number');
 
     try {
       // upload image
