@@ -100,14 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     }).toList(),
                     ...pages,
-                    SizedBox(
-                      height: double.infinity,
-                      width: double.infinity,
-                      child: SfSignaturePad(
-                        key: _signaturePadKey,
-                        backgroundColor: Colors.grey[200],
-                      ),
-                    ),
                   ],
                   onPageChanged: (index) {
                     setState(() {
@@ -278,7 +270,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               });*/
 
-              final canvas = html.CanvasElement(width: 500, height: 500);
+              // get width and height of _signaturePadKey
+              final width = _signaturePadKey.currentContext!.size!.width;
+              final height = _signaturePadKey.currentContext!.size!.height;
+
+              final canvas = html.CanvasElement(
+                  width: width.toInt(), height: height.toInt());
               final context = canvas.context2D;
 
               //Get the signature in the canvas context.
@@ -288,9 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
               final blob = await canvas.toBlob('image/jpeg', 1.0);
               print(blob);
 
-              StorageService().uploadBlob('image.png', blob).then((value) {
-                print('Signature uploaded');
-              });
+              StorageService().uploadBlob('image.png', blob).then((value) {});
             },
             icon: Icon(Icons.add_circle_outline, color: Colors.blue),
           ),
