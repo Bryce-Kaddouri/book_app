@@ -46,8 +46,33 @@ class StorageService {
     return number;
   }
 
+  // method to get metadata for all files in a folder
+  Future<List<FullMetadata>> getMetadata() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return [];
+    }
+    String folderName = 'users/${user.uid}/pages';
+    try {
+      // list all get download urls
+      ListResult result = await _storage.ref(folderName).listAll();
+      // loop through result
+      List<FullMetadata> metadata = [];
+      for (var ref in result.items) {
+        FullMetadata data = await ref.getMetadata();
+        metadata.add(data);
+      }
+      return Future.value(metadata);
+    } catch (e) {
+      // print error
+      print(e);
+      // return null
+      return [];
+    }
+  }
+
   // put blob
-  Future<void> uploadBlob(String path, Blob blob) async {
+  Future<void> uploadBlob(String path, Blob blob, List<String> keyWords) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return;
@@ -64,7 +89,11 @@ class StorageService {
       UploadTask uploadTask;
       Reference ref =
           FirebaseStorage.instance.ref().child('$folderName/${number}.png');
+
       final metadata = SettableMetadata(
+        customMetadata: {
+          'keywords': keyWords.join(','),
+        },
         contentType: 'image/png',
       );
 

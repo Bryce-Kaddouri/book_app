@@ -1,6 +1,7 @@
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'package:book_app/services/extract_text_service.dart';
 import 'package:book_app/services/storage_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -147,47 +148,69 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           title: Container(
             height: 46,
-            child: SearchAnchor.bar(
-              barBackgroundColor: MaterialStateProperty.all(Colors.blueGrey),
+            child: FutureBuilder(
+                future: StorageService().getMetadata(),
+                builder: (context, snapshot) {
+                  List<Widget> lstWidget = [];
 
-              barElevation: MaterialStateProperty.all(1),
-              barShape: MaterialStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-
-              barOverlayColor: MaterialStateProperty.all(Colors.blueGrey),
-              barPadding: MaterialStateProperty.all(EdgeInsets.all(2)),
-              barSide: MaterialStateProperty.all(BorderSide.none),
-              viewSide: BorderSide.none,
-              suggestionsBuilder: (context, query) {
-                print('query: $query');
-                return [
-                  ListTile(
-                    title: Text('test'),
-                  ),
-                  ListTile(
-                    title: Text('test'),
-                  ),
-                  ListTile(
-                    title: Text('test'),
-                  ),
-                ];
-              },
-              searchController: searchController,
-              // suggestions: [
-              //   ListTile(
-              //     title: Text('test'),
-              //   ),
-              //   ListTile(
-              //     title: Text('test'),
-              //   ),
-              //   ListTile(
-              //     title: Text('test'),
-              //   ),
-              // ],
-            ),
+                  if (snapshot.hasData) {
+                    List<FullMetadata> lst =
+                        snapshot.data as List<FullMetadata>;
+                    return SearchAnchor.bar(
+                      barBackgroundColor:
+                          MaterialStateProperty.all(Colors.blueGrey),
+                      barElevation: MaterialStateProperty.all(1),
+                      barShape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      barOverlayColor:
+                          MaterialStateProperty.all(Colors.blueGrey),
+                      barPadding: MaterialStateProperty.all(EdgeInsets.all(2)),
+                      barSide: MaterialStateProperty.all(BorderSide.none),
+                      viewSide: BorderSide.none,
+                      suggestionsBuilder: (context, query) {
+                        if (query.text.isNotEmpty) {
+                          lstWidget = lst
+                              .where((element) => element.name
+                                  .toLowerCase()
+                                  .contains(query.text.toLowerCase()))
+                              .map((e) {
+                            return ListTile(
+                              title: Text(e.name),
+                              onTap: () {
+                                Navigator.pop(context);
+                                controller.animateToPage(lst.indexOf(e) + 1,
+                                    duration: Duration(seconds: 1),
+                                    curve: Curves.easeInOut);
+                              },
+                            );
+                          }).toList();
+                          return lstWidget;
+                        } else {
+                          lstWidget = lst.map((e) {
+                            return ListTile(
+                              title: Text(e.name),
+                              onTap: () {
+                                Navigator.pop(context);
+                                controller.animateToPage(lst.indexOf(e) + 1,
+                                    duration: Duration(seconds: 1),
+                                    curve: Curves.easeInOut);
+                              },
+                            );
+                          }).toList();
+                          return lstWidget;
+                        }
+                      },
+                      searchController: searchController,
+                    );
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                }),
           ),
           automaticallyImplyLeading: false,
         ),
@@ -399,8 +422,11 @@ class _HomeScreenState extends State<HomeScreen>
               //Get the image from the canvas context
               final blob = await canvas.toBlob('image/jpeg', 1.0);
               print(blob);
+              List<String> keyWords = [];
 
-              await StorageService().uploadBlob('image.png', blob).whenComplete(
+              await StorageService()
+                  .uploadBlob('image.png', blob, keyWords)
+                  .whenComplete(
                     () => ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Signature saved'),
@@ -413,6 +439,20 @@ class _HomeScreenState extends State<HomeScreen>
             icon: Icon(Icons.add_circle_outline, color: Colors.blue),
           ),
         ],
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            // clear signature
+            ExtractTextService()
+                .ocr('https://tesseract.projectnaptha.com/img/eng_bw.png');
+/*
+                'https://tesseract.projectnaptha.com/img/eng_bw.png'
+*/
+/*
+                'https://firebasestorage.googleapis.com/v0/b/my-digital-writting-book.appspot.com/o/users%2FjOLOb5O665OyWfu1WElIJvhFm1F3%2Fpages%2F3.png?alt=media&token=13efb06f-bfcd-4fce-8ef0-3d92c07bc1c1');
+*/
+          },
+          child: Text("Extract Text"),
+        ),
       ),
     );
   }
