@@ -92,6 +92,7 @@ class StorageService {
 
       final metadata = SettableMetadata(
         customMetadata: {
+          'page': 'page $number',
           'keywords': keyWords.join(','),
         },
         contentType: 'image/png',
